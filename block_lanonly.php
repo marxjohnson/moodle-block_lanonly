@@ -5,32 +5,16 @@
  */
 
 
-class block_lanonly extends block_base {
-
-    function is_local(){
-       $iplong = ip2long( $_SERVER['REMOTE_ADDR']);
-
-       if(
-           (ip2long('10.0.0.0')<=$iplong)and(ip2long('10.255.255.255')>=$iplong)
-        or (ip2long('172.16.0.0')<=$iplong)and(ip2long('172.31.255.255')>=$iplong)
-        or (ip2long('192.168.0.0')<=$iplong)and(ip2long('192.168.255.255')>=$iplong)
-       ){
-           return true;
-       }else{
-           return false;
-       }
-    }
-
-
-    function preferred_width() {
-        // The preferred value is in pixels
-        return 250;
-    }
+class block_lanonly extends block_base {    
 
     function init() {
         $this->title = get_string('pluginname','block_lanonly');
     }
 
+    function preferred_width() {
+        // The preferred value is in pixels
+        return 250;
+    }    
 
     function applicable_formats() {
         return array('all' => true);
@@ -82,6 +66,20 @@ class block_lanonly extends block_base {
         $this->content->footer = '';
 
         return $this->content;
+    }
+
+    function is_local() {
+
+        $iplong = ip2long( $_SERVER['REMOTE_ADDR']);
+        if ((ip2long('10.0.0.0') <= $iplong) && (ip2long('10.255.255.255') >= $iplong)
+        || (ip2long('172.16.0.0') <= $iplong) && (ip2long('172.31.255.255') >= $iplong)
+        || (ip2long('192.168.0.0') <= $iplong) && (ip2long('192.168.255.255') >= $iplong)) {
+
+            return true;
+
+       } else {
+            return false;
+       }
     }
 
     /**
