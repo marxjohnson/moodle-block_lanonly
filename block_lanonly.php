@@ -28,9 +28,7 @@ class block_lanonly extends block_base {
     }
 
     function init() {
-        $this->title = get_string('insideoutsideblock','block_lanonly');
-        $this->content_type = BLOCK_TYPE_TEXT;
-        $this->version = 2008112700;
+        $this->title = get_string('pluginname','block_lanonly');
     }
 
 
@@ -48,34 +46,39 @@ class block_lanonly extends block_base {
             return $this->content;
         }
 
-        if($this->is_local()){
-            if(empty($this->config)){
-                $title=get_string('newblock','block_lanonly');
-                $text='';
-            }else{
-                $title=$this->config->lantitle;
-                $text=$this->config->lantext;
+        if ($this->is_local()) {
+
+            if (empty($this->config)) {
+                $title = get_string('newblock','block_lanonly');
+                $text = '';
+            } else {
+                $title = $this->config->title_onsite;
+                $text = $this->config->text_onsite['text'];
             }
-        }else{
-            if(empty($this->config)){
-                $title=get_string('newblock','block_lanonly');
-                $text='';
-            }else{
-                $title=$this->config->notlantitle;
-                $text=$this->config->notlantext;
+
+        } else {
+
+            if (empty($this->config)) {
+                $title = get_string('newblock','block_lanonly');
+                $text = '';
+            } else {
+                $title = $this->config->title_onsite;
+                $text = $this->config->title_offsite['text'];
             }
+
         }
 
-        $this->title=format_string($title);
+        $this->title = format_string($title);
 
         $this->content = new stdClass;
 
         $formatoptions = new object();
         $formatoptions->noclean = true;
 
-        if(!$this->content->text = format_text($text, FORMAT_HTML,$formatoptions)){
+        if (!$this->content->text = format_text($text, FORMAT_HTML,$formatoptions)) {
              $this->content->text= '';
         }
+        
         $this->content->footer = '';
 
         return $this->content;
