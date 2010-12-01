@@ -35,9 +35,11 @@ class block_lanonly extends block_base {
             if (empty($this->config)) {
                 $title = get_string('newblock','block_lanonly');
                 $text = '';
+                $format = '';
             } else {
                 $title = $this->config->title_onsite;
-                $text = $this->config->text_onsite['text'];
+                $text = $this->config->text_onsite;
+                $format = $this->config->format_onsite;
             }
 
         } else {
@@ -45,25 +47,35 @@ class block_lanonly extends block_base {
             if (empty($this->config)) {
                 $title = get_string('newblock','block_lanonly');
                 $text = '';
+                $format = '';
             } else {
                 $title = $this->config->title_onsite;
-                $text = $this->config->title_offsite['text'];
+                $text = $this->config->title_offsite;
+                $format = $this->config->format_offsite;
             }
 
         }
 
         $this->title = format_string($title);
 
-        $this->content = new stdClass;
-
-        $formatoptions = new object();
-        $formatoptions->noclean = true;
-
-        if (!$this->content->text = format_text($text, FORMAT_HTML,$formatoptions)) {
-             $this->content->text= '';
+        $filteropt = new stdClass;
+        $filteropt->overflowdiv = true;
+        if ($this->content_is_trusted()) {
+            // fancy html allowed only on course, category and system blocks.
+            $filteropt->noclean = true;
         }
-        
+
+        $this->content = new stdClass;
         $this->content->footer = '';
+        if (!empty($text)) {
+            // rewrite url
+            $text = file_rewrite_pluginfile_urls($text, 'pluginfile.php', $this->context->id, 'block_lanonly', 'content', NULL);
+            $this->content->text = format_text($text, $format, $filteropt);
+        } else {
+            $this->content->text = '';
+        }
+
+        unset($filteropt); // memory footprint
 
         return $this->content;
     }
@@ -83,50 +95,43 @@ class block_lanonly extends block_base {
     }
 
     /**
-     * Will be called before an instance of this block is backed up, so that any links in
-     * any links in any HTML fields on config can be encoded.
-     * @return string
+     * Serialize and store config data
      */
-    function get_backup_encoded_config() {
-        /// Prevent clone for non configured block instance. Delegate to parent as fallback.
-        if (empty($this->config)) {
-            return parent::get_backup_encoded_config();
-        }
-        $data = clone($this->config);
-        $data->text = backup_encode_absolute_links($data->text);
-        return base64_encode(serialize($data));
+    function instance_config_save($data, $nolongerused = false) {
+        global $DB;
+
+        $config = clone($data);
+        // Move embedded files into a proper filearea and adjust HTML links to match
+        $config->text_onsite = file_save_draft_area_files($data->text_onsite['itemid'], $this->context->id, 'block_lanonly', 'content', 0, array('subdirs'=>true), $data->text_onsite['text']);
+        $config->format_onsite = $data->text_onsite['format'];
+        $config->text_offsite = file_save_draft_area_files($data->text_offsite['itemid'], $this->context->id, 'block_lanonly', 'content', 0, array('subdirs'=>true), $data->text_offsite['text']);
+        $config->format_offsite = $data->text_offsite['format'];
+
+        parent::instance_config_save($config, $nolongerused);
     }
 
-    /**
-     * This function makes all the necessary calls to {@link restore_decode_content_links_worker()}
-     * function in order to decode contents of this block from the backup
-     * format to destination site/course in order to mantain inter-activities
-     * working in the backup/restore process.
-     *
-     * This is called from {@link restore_decode_content_links()} function in the restore process.
-     *
-     * NOTE: There is no block instance when this method is called.
-     *
-     * @param object $restore Standard restore object
-     * @return boolean
-     **/
-    function decode_content_links_caller($restore) {
-        global $CFG;
+    function instance_delete() {
+        global $DB;
+        $fs = get_file_storage();
+        $fs->delete_area_files($this->context->id, 'block_lanonly');
+        return true;
+    }
 
-        if ($restored_blocks = get_records_select("backup_ids","table_name = 'block_instance' AND backup_code = $restore->backup_unique_code AND new_id > 0", "", "new_id")) {
-            $restored_blocks = implode(',', array_keys($restored_blocks));
-            $sql = "SELECT bi.*
-                      FROM {$CFG->prefix}block_instance bi
-                           JOIN {$CFG->prefix}block b ON b.id = bi.blockid
-                     WHERE b.name = 'html' AND bi.id IN ($restored_blocks)";
+    function content_is_trusted() {
+        global $SCRIPT;
 
-            if ($instances = get_records_sql($sql)) {
-                foreach ($instances as $instance) {
-                    $blockobject = block_instance('html', $instance);
-                    $blockobject->config->text = restore_decode_absolute_links($blockobject->config->text);
-                    $blockobject->config->text = restore_decode_content_links_worker($blockobject->config->text, $restore);
-                    $blockobject->instance_config_commit($blockobject->pinned);
-                }
+        if (!$context = get_context_instance_by_id($this->instance->parentcontextid)) {
+            return false;
+        }
+        //find out if this block is on the profile page
+        if ($context->contextlevel == CONTEXT_USER) {
+            if ($SCRIPT === '/my/index.php') {
+                // this is exception - page is completely private, nobody else may see content there
+                // that is why we allow JS here
+                return true;
+            } else {
+                // no JS on public personal pages, it would be a big security issue
+                return false;
             }
         }
 
