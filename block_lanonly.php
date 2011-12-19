@@ -115,7 +115,7 @@ class block_lanonly extends block_base {
     public function is_local() {
 
         $iplong = ip2long($_SERVER['REMOTE_ADDR']);
-        $islanclassa = ip2long('10.0.0.0') <= $iplong && ip2long('10.255.255.255' >= $iplong;
+        $islanclassa = ip2long('10.0.0.0') <= $iplong && ip2long('10.255.255.255') >= $iplong;
         $islanclassb = ip2long('172.16.0.0') <= $iplong && ip2long('172.31.255.255') >= $iplong;
         $islanclassc = ip2long('192.168.0.0') <= $iplong && ip2long('192.168.255.255') >= $iplong;
         if ($islanclassa || $islanclassb || $islanclassc) {
