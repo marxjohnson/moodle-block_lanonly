@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -16,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Form for editing LANOnly block instances.
+ * Defines form for editing On-site/Off-site block instances.
  *
  * @package   block_lanonly
  * @copyright 2010 Taunton's College
@@ -25,7 +24,10 @@
  */
 
 /**
- * Form for editing LANOnly block instances.
+ * Form for editing On-site/Off-site block instances.
+ *
+ * Based on the {@see block_html_edit_form} but modified to allow 2 versions of the content and
+ * title to be defined
  *
  * @copyright 2010 Taunton's College
  * @author    Mark Johnson <mark.johnson@tauntons.ac.uk>
@@ -39,22 +41,28 @@ class block_lanonly_edit_form extends block_edit_form {
         $mform->addElement('text', 'config_title_onsite', get_string('title', 'block_lanonly'));
         $mform->setType('config_title_onsite', PARAM_MULTILANG);
 
-        $editoroptions = array('maxfiles' => EDITOR_UNLIMITED_FILES, 'noclean' => true, 'context' => $this->block->context);
-        $mform->addElement('editor', 'config_text_onsite', get_string('content', 'block_lanonly'), null, $editoroptions);
+        $editoroptions = array(
+            'maxfiles' => EDITOR_UNLIMITED_FILES,
+            'noclean' => true,
+            'context' => $this->block->context
+        );
+        $strcontent = get_string('content', 'block_lanonly');
+        $strleaveblank = get_string('leaveblanktohide', 'block_lanonly');
+        $mform->addElement('editor', 'config_text_onsite', $strcontent, null, $editoroptions);
         $mform->setType('config_text_onsite', PARAM_RAW); // XSS is prevented when printing the block contents and serving files
-        $mform->addElement('static', 'leaveblank_onsite', '', get_string('leaveblanktohide', 'block_lanonly'));
+        $mform->addElement('static', 'leaveblank_onsite', '', $strleaveblank);
 
         $mform->addElement('header', 'configheaderoffsite', get_string('outsidelan', 'block_lanonly'));
 
         $mform->addElement('text', 'config_title_offsite', get_string('title', 'block_lanonly'));
         $mform->setType('config_title_offsite', PARAM_MULTILANG);
 
-        $mform->addElement('editor', 'config_text_offsite', get_string('content', 'block_lanonly'), null, $editoroptions);
+        $mform->addElement('editor', 'config_text_offsite', $strcontent, null, $editoroptions);
         $mform->setType('config_text_offsite', PARAM_RAW); // XSS is prevented when printing the block contents and serving files
-        $mform->addElement('static', 'leaveblank_offsite', '', get_string('leaveblanktohide', 'block_lanonly'));
+        $mform->addElement('static', 'leaveblank_offsite', '', $strleaveblank);
     }
 
-    function set_data($defaults) {
+    public function set_data($defaults) {
         if (!empty($this->block->config) && is_object($this->block->config)) {
             $text_onsite = $this->block->config->text_onsite;
             $draftid_editor = file_get_submitted_draft_itemid('config_text_onsite');
@@ -70,7 +78,13 @@ class block_lanonly_edit_form extends block_edit_form {
                 $defaults->config_title_onsite = $this->block->config->title_onsite;
             }
 
-            $defaults->config_text_onsite['text'] = file_prepare_draft_area($draftid_editor, $this->block->context->id, 'block_lanonly', 'content', 0, array('subdirs'=>true), $currenttext_onsite);
+            $defaults->config_text_onsite['text'] = file_prepare_draft_area($draftid_editor, 
+                                                                            $this->block->context->id,
+                                                                            'block_lanonly',
+                                                                            'content',
+                                                                            0,
+                                                                            array('subdirs'=>true),
+                                                                            $currenttext_onsite);
             $defaults->config_text_onsite['itemid'] = $draftid_editor;
             $defaults->config_text_onsite['format'] = $this->block->config->format_onsite;
 
@@ -88,7 +102,13 @@ class block_lanonly_edit_form extends block_edit_form {
                 $defaults->config_title_offsite = $this->block->config->title_offsite;
             }
 
-            $defaults->config_text_offsite['text'] = file_prepare_draft_area($draftid_editor, $this->block->context->id, 'block_lanonly', 'content', 0, array('subdirs'=>true), $currenttext_offsite);
+            $defaults->config_text_offsite['text'] = file_prepare_draft_area($draftid_editor,
+                                                                             $this->block->context->id,
+                                                                             'block_lanonly',
+                                                                             'content',
+                                                                             0,
+                                                                             array('subdirs'=>true),
+                                                                             $currenttext_offsite);
             $defaults->config_text_offsite['itemid'] = $draftid_editor;
             $defaults->config_text_offsite['format'] = $this->block->config->format_offsite;
 
