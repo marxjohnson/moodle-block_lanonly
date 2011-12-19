@@ -76,8 +76,8 @@ class block_lanonly extends block_base {
                 $text = '';
                 $format = '';
             } else {
-                $title = $this->config->title_onsite;
-                $text = $this->config->title_offsite;
+                $title = $this->config->title_offsite;
+                $text = $this->config->text_offsite;
                 $format = $this->config->format_offsite;
             }
 
