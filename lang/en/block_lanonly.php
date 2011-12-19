@@ -32,4 +32,4 @@ $string['newblock'] = '(New On-site/Off-iste Block)';
 $string['outsidelan']   = 'Block to display to off-site users';
 $string['pluginname']   = 'On-site/Off-site';
 $string['pluginnameplural'] = 'On-site/Off-site Blocks';
-$string['title']    = 'Title'
+$string['title']    = 'Title';
