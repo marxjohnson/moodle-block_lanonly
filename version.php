@@ -23,8 +23,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$plugin->version = 2010112100;
+$plugin->version = 2012010400;
 $plugin->requires = 2010112400;
 $plugin->component = 'block_lanonly';
 $plugin->maturity = MATURITY_STABLE;
-$plugin->release = '2.0 (Build: 2010112100)';
+$plugin->release = '2.0 (Build: 2012010400)';
