@@ -112,9 +112,20 @@ class block_lanonly extends block_base {
         return $this->content;
     }
 
+    public function get_ip() {
+        if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        } elseif (isset($_SERVER['HTTP_CLIENT_IP'])) {
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
+        } else {
+            $ip = $_SERVER['REMOTE_ADDR'];
+        }
+        return $ip;
+    }
+
     public function is_local() {
 
-        $iplong = ip2long($_SERVER['REMOTE_ADDR']);
+        $iplong = ip2long($this->get_ip());
         $islanclassa = ip2long('10.0.0.0') <= $iplong && ip2long('10.255.255.255') >= $iplong;
         $islanclassb = ip2long('172.16.0.0') <= $iplong && ip2long('172.31.255.255') >= $iplong;
         $islanclassc = ip2long('192.168.0.0') <= $iplong && ip2long('192.168.255.255') >= $iplong;
