@@ -5,6 +5,6 @@ the user is accessing the page though a local network, or the public Internet.
 
 To install, place all files in /blocks/lanonly and visit /admin/index.php in your browser.
 
-This block was written by Mike Worth and Mark Johnson <mark.johnson@tauntons.ac.uk> and is
+This block was written by Mike Worth <mike@mike-worth.com> and Mark Johnson <mark.johnson@tauntons.ac.uk> and is
 Copyright Taunton's College, Southampton.
 Released Under the GNU General Public Licence http://www.gnu.org/copyleft/gpl.html
