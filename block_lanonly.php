@@ -163,7 +163,7 @@ class block_lanonly extends block_base {
     public function content_is_trusted() {
         global $SCRIPT;
 
-        if (!$context = get_context_instance_by_id($this->instance->parentcontextid)) {
+        if (!$context = context::instance_by_id($this->instance->parentcontextid)) {
             return false;
         }
         //find out if this block is on the profile page
